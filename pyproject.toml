@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=64", "setuptools-scm>=6.4", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+root = "."
+write_to = "src/karabo-proxy/_version.py"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+Karabo-proxy = ["data/*.*"]
+
+[project.entry-points."karabo.middlelayer_device"]
+Karabo-proxy = "karabo-proxy.Karabo-proxy:Karabo-proxy"
+
+[project]
+dynamic = ["version"]
+name = "Karabo-proxy"
+authors = [
+    {name = "degon"},
+]
+description = ""
+readme = "README.md"
+dependencies = [
+]
