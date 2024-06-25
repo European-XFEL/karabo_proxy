@@ -4,22 +4,22 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
 root = "."
-write_to = "src/karabo-proxy/_version.py"
+write_to = "src/karabo_proxy/_version.py"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-Karabo-proxy = ["data/*.*"]
+Karabo_proxy = ["data/*.*"]
 
-[project.entry-points."karabo.middlelayer_device"]
-Karabo-proxy = "karabo-proxy.Karabo-proxy:Karabo-proxy"
+[project.scripts]
+karabo-channel = "karabo_proxy.async_channel:main"
 
 [project]
 dynamic = ["version"]
 name = "Karabo-proxy"
 authors = [
-    {name = "degon"},
+    {name = "costar & degon"},
 ]
 description = ""
 readme = "README.md"
