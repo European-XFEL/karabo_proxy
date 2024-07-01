@@ -1,13 +1,14 @@
 import os
 import os.path as op
 import subprocess
+from typing import List
 
 import karabo_proxy
 
 IGNORE_LIST = ['setup.py', '__init__.py']
 
 
-def get_python_files():
+def get_python_files() -> List[str]:
     """Get all python files from this package
     """
     common_dir = op.abspath(op.dirname(karabo_proxy.__file__))
