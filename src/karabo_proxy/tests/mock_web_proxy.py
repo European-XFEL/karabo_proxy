@@ -1,3 +1,5 @@
+import argparse
+
 from aiohttp import web
 
 TOPOLOGY_RESPONSE_VALID = (
@@ -46,17 +48,15 @@ _app_invalid = web.Application()
 _app_invalid.add_routes(
     ([web.get("/topology.json", _handle_topology_invalid)]))
 
-
-async def run_valid_mock():
-    await _run_mock(_app_valid, PORT_VALID_MOCK)
-
-
-async def run_invalid_mock():
-    await _run_mock(_app_invalid, PORT_INVALID_MOCK)
-
-
-async def _run_mock(app, port):
-    runner = web.AppRunner(app)
-    await runner.setup()
-    site = web.TCPSite(runner, '0.0.0.0', port)
-    await site.start()
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        prog="mock_web_proxy",
+        description="WebProxy Mocker")
+    parser.add_argument("--invalid", action="store_true")
+    args = parser.parse_args()
+    if args.invalid:
+        print("Launching mock in invalid mode...")
+        web.run_app(_app_invalid, port=PORT_INVALID_MOCK)
+    else:
+        print("Launching mock in valid mode...")
+        web.run_app(_app_valid, port=PORT_VALID_MOCK)
