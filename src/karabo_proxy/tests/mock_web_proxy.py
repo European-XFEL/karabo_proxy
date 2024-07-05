@@ -20,9 +20,37 @@ TOPOLOGY_RESPONSE_INVALID = (
     '  }, '
     '  "servers": {'
     '    "A_SIMPLE_SERVER": {"__serverId__": "A_SIMPLE_SERVER"}'
-    '  }'
+    '  },'
     ' "client": {}'
     '}')  # "devices" and "servers" instead of singular forms; no "macro".
+
+DEVICE_GET_CONFIGURATION_VALID = (
+    '{'
+    '  "_deviceId_":{"value":"Karabo_GuiServer_0", '
+    '                "timestamp": 1719838221.5852, "tid": 0},'
+    '  "deviceId":{"value":"Karabo_GuiServer_0", '
+    '              "timestamp": 1719838221.5852, "tid": 0}'
+    '}')
+
+# the WebProxy returns a status code 500 with the following payload
+# for an attempt to get the configuration of a device not in the topology
+DEVICE_GET_CONFIGURATION_INVALID = (
+    '{'
+    '  "detail": "Device Karabo_GuiServer_XYZ not online or not alive"'
+    '}')
+
+DEVICE_SET_CONFIGURATION_VALID = (
+    '{'
+    '  "success": true, '
+    '  "reason": ""'
+    '}')
+
+DEVICE_SET_CONFIGURATION_INVALID = (
+    '{'
+    '  "success": false, '
+    '  "reason": "Lacking valid access_token with permissions ..."'
+    '}')
+
 
 # Port listened by the mock that returns valid responses
 PORT_VALID_MOCK = 8383
@@ -41,12 +69,48 @@ async def _handle_topology_invalid(request):
         content_type="application/json",
         text=TOPOLOGY_RESPONSE_INVALID)
 
+
+async def _handle_get_device_configuration(request):
+    return web.Response(
+        content_type="application/json",
+        text=DEVICE_GET_CONFIGURATION_VALID)
+
+
+async def _handle_get_device_configuration_invalid(request):
+    return web.Response(
+        content_type="application/json",
+        text=DEVICE_GET_CONFIGURATION_INVALID,
+        status=500,
+        reason="Internal Server Error")
+
+
+async def _handle_set_device_configuration(request):
+    return web.Response(
+        content_type="application/json",
+        text=DEVICE_SET_CONFIGURATION_VALID)
+
+
+async def _handle_set_device_configuration_invalid(request):
+    return web.Response(
+        content_type="application/json",
+        text=DEVICE_SET_CONFIGURATION_INVALID)
+
+
 _app_valid = web.Application()
-_app_valid.add_routes([web.get("/topology.json", _handle_topology)])
+_app_valid.add_routes([
+    web.get("/topology.json", _handle_topology),
+    web.get("/devices/{device_id}/config.json",
+            _handle_get_device_configuration),
+    web.put("/devices/{device_id}/config.json",
+            _handle_set_device_configuration)])
 
 _app_invalid = web.Application()
-_app_invalid.add_routes(
-    ([web.get("/topology.json", _handle_topology_invalid)]))
+_app_invalid.add_routes([
+    web.get("/topology.json", _handle_topology_invalid),
+    web.get("/devices/{device_id}/config.json",
+            _handle_get_device_configuration_invalid),
+    web.put("/devices/{device_id}/config.json",
+            _handle_set_device_configuration_invalid)])
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
