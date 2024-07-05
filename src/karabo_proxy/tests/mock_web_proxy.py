@@ -51,6 +51,22 @@ DEVICE_SET_CONFIGURATION_INVALID = (
     '  "reason": "Lacking valid access_token with permissions ..."'
     '}')
 
+DEVICE_EXECUTE_SLOT_VALID = (
+    '{'
+    '  "success": true, '
+    '  "reason": "", '
+    '  "reply": {'
+    '            "quotient": 2, '
+    '            "remainder": 3 '
+    '           } '
+    '}')
+
+DEVICE_EXECUTE_SLOT_INVALID = (
+    '{'
+    '  "success": false, '
+    '  "reason": "none_works has no slot divide"'
+    '}')
+
 
 # Port listened by the mock that returns valid responses
 PORT_VALID_MOCK = 8383
@@ -96,13 +112,27 @@ async def _handle_set_device_configuration_invalid(request):
         text=DEVICE_SET_CONFIGURATION_INVALID)
 
 
+async def _handle_execute_slot(request):
+    return web.Response(
+        content_type="application/json",
+        text=DEVICE_EXECUTE_SLOT_VALID)
+
+
+async def _handle_execute_slot_invalid(request):
+    return web.Response(
+        content_type="application/json",
+        text=DEVICE_EXECUTE_SLOT_INVALID)
+
+
 _app_valid = web.Application()
 _app_valid.add_routes([
     web.get("/topology.json", _handle_topology),
     web.get("/devices/{device_id}/config.json",
             _handle_get_device_configuration),
     web.put("/devices/{device_id}/config.json",
-            _handle_set_device_configuration)])
+            _handle_set_device_configuration),
+    web.put("/devices/{device_id}/slot/{slot_name}.json",
+            _handle_execute_slot)])
 
 _app_invalid = web.Application()
 _app_invalid.add_routes([
@@ -110,7 +140,9 @@ _app_invalid.add_routes([
     web.get("/devices/{device_id}/config.json",
             _handle_get_device_configuration_invalid),
     web.put("/devices/{device_id}/config.json",
-            _handle_set_device_configuration_invalid)])
+            _handle_set_device_configuration_invalid),
+    web.put("/devices/{device_id}/slot/{slot_name}.json",
+            _handle_execute_slot_invalid)])
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(

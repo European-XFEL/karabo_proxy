@@ -2,12 +2,12 @@ from typing import Any, Dict
 
 import requests
 
+from .data.device_config import DeviceConfigInfo, PropertyValue
+from .data.topology import TopologyInfo
+from .data.web_proxy_responses import WriteResponse
 from .message_format import (
     error_401_put, error_403_put, error_422_put, error_on_operation,
     invalid_response_format)
-from .schemas.device_config import DeviceConfigInfo, PropertyValue
-from .schemas.topology import TopologyInfo
-from .schemas.web_proxy_responses import WriteResponse
 
 
 class SyncKaraboProxy:
@@ -58,6 +58,19 @@ class SyncKaraboProxy:
             json=properties, headers=self._headers)
         return self._handle_put_response(
             resp, "set configuration", device_id)
+
+    def execute_slot(
+        self, device_id: str, slot_name: str,
+            slot_params: Dict[str, PropertyValue]) -> WriteResponse:
+        """Executes a device slot. Supports both parameterless slots (commands)
+        and slots with parameters. The results of the slot execution (if any)
+        will be available as a dictionay in the field 'reply' of the response
+        """
+        resp = requests.put(
+            f"{self.base_url}devices/{device_id}/slot/{slot_name}.json",
+            json=slot_params, headers=self._headers)
+        return self._handle_put_response(
+            resp, f"execute slot {slot_name}", device_id)
 
     def _handle_get_response(self,
                              resp: requests.Response,
@@ -134,8 +147,17 @@ def main():
         "CJlbWFpbCI6InJhdWwuY29zdGFAeGZlbC5ldSJ9LCJwcm9wb3NhbE51bWJlciI6OTAwMz"
         "M0LCJwZXJtaXNzaW9ucyI6WzMsMSwyXSwiZXhwIjoxNzIzNjE0OTU5fQ.yv3XudlIGMbr"
         "lcvX6FdDsqJVBTx5cPwQgvr2I8uWovM")
+    print()
+    print("--- Set device configuration - flushInterval ---")
+    print()
     result = client.set_device_configuration(
         "KARABO_DATALOGGERMANAGER_0", {"flushInterval": 85})
+    print(result)
+    print()
+    print("--- Slot Execution: topologyCheck.slotForceCheck ---")
+    print()
+    result = client.execute_slot(
+        "KARABO_DATALOGGERMANAGER_0", "topologyCheck.slotForceCheck", {})
     print(result)
 
 

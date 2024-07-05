@@ -5,7 +5,7 @@ from time import sleep
 import pytest
 
 from ..async_karabo_proxy import AsyncKaraboProxy
-from ..schemas.topology import TopologyInfo
+from ..data.topology import TopologyInfo
 from ..sync_karabo_proxy import SyncKaraboProxy
 from .mock_web_proxy import (
     DEVICE_GET_CONFIGURATION_VALID, PORT_INVALID_MOCK, PORT_VALID_MOCK)
@@ -139,3 +139,42 @@ async def test_set_device_configuration(web_proxy_mocks,
         "none_works", {"a_property": 120})
     assert (not result.success)
     assert (result.reason.startswith("Lacking valid access_token"))
+
+
+@pytest.mark.asyncio
+async def test_execute_slot(web_proxy_mocks,
+                            valid_mock_async_cli,
+                            valid_mock_sync_cli,
+                            invalid_mock_async_cli,
+                            invalid_mock_sync_cli):
+    # Checks that a correct async request to the valid mock succeeds
+    result = await valid_mock_async_cli.execute_slot(
+        "any_works", "divide", {"dividend": 15, "divisor": 6})
+    assert (result.success)
+    assert (result.reason == "")
+    assert (type(result.reply) is dict)
+    assert (result.reply["quotient"] == 2)
+    assert (result.reply["remainder"] == 3)
+    # Checks that a correct async request to the invalid mock fails with an
+    # error that the slot is not available
+    result = await invalid_mock_async_cli.execute_slot(
+        "none_works", "divide", {"dividend": 15, "divisor": 6})
+    assert (not result.success)
+    assert (result.reason.startswith("none_works has no slot divide"))
+    assert (result.reply is None)
+
+    # Checks that a correct sync request to the valid mock succeeds
+    result = valid_mock_sync_cli.execute_slot(
+        "any_works", "divide", {"dividend": 15, "divisor": 6})
+    assert (result.success)
+    assert (result.reason == "")
+    assert (type(result.reply) is dict)
+    assert (result.reply["quotient"] == 2)
+    assert (result.reply["remainder"] == 3)
+    # Checks that a correct sync request to the invalid mock fails with an
+    # error that the slot is not available
+    result = invalid_mock_sync_cli.execute_slot(
+        "none_works", "divide", {"dividend": 15, "divisor": 6})
+    assert (not result.success)
+    assert (result.reason.startswith("none_works has no slot divide"))
+    assert (result.reply is None)
