@@ -4,7 +4,7 @@ from typing import Any, Dict
 from aiohttp import ClientResponse, ClientSession
 
 from .data.device_config import DeviceConfigInfo, PropertyValue
-from .data.topology import TopologyInfo
+from .data.topology import DevicesInfo, TopologyInfo
 from .data.web_proxy_responses import WriteResponse
 from .message_format import (
     error_401_put, error_403_put, error_422_put, error_on_operation,
@@ -35,6 +35,19 @@ class AsyncKaraboProxy:
                 try:
                     topology_info = TopologyInfo(**data)
                     return topology_info
+                except TypeError as te:
+                    raise RuntimeError(invalid_response_format(str(te)))
+
+    async def get_devices(self) -> DevicesInfo:
+        """Retrieves the devices in the topic containing the connected
+        WebProxy."""
+        async with ClientSession(headers=self._headers) as session:
+            async with session.get(f"{self.base_url}devices.json") as resp:
+                data = await self._handle_get_response(
+                    resp, "getting devices")
+                try:
+                    devices_info = DevicesInfo(**data)
+                    return devices_info
                 except TypeError as te:
                     raise RuntimeError(invalid_response_format(str(te)))
 
@@ -138,6 +151,8 @@ async def main():
     client = AsyncKaraboProxy("http://exflqr30450:8282")
     topology = await client.get_topology()
     print(f"topology = {topology}")
+    devices = await client.get_devices()
+    print(f"devices = {devices}")
     device_config = await client.get_device_configuration("Karabo_GuiServer_0")
     print(f"device_config = {device_config}")
     client.set_access_token(

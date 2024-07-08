@@ -5,7 +5,7 @@ from time import sleep
 import pytest
 
 from ..async_karabo_proxy import AsyncKaraboProxy
-from ..data.topology import TopologyInfo
+from ..data.topology import DevicesInfo, TopologyInfo
 from ..sync_karabo_proxy import SyncKaraboProxy
 from .mock_web_proxy import (
     DEVICE_GET_CONFIGURATION_VALID, PORT_INVALID_MOCK, PORT_VALID_MOCK)
@@ -78,6 +78,29 @@ async def test_get_topology(web_proxy_mocks,
     # invalid response
     with pytest.raises(RuntimeError, match="Invalid response format"):
         topology = invalid_mock_sync_cli.get_topology()
+
+
+@pytest.mark.asyncio
+async def test_get_devices(web_proxy_mocks,
+                           valid_mock_async_cli,
+                           valid_mock_sync_cli,
+                           invalid_mock_async_cli,
+                           invalid_mock_sync_cli):
+    # Checks that a correct async request to the valid mock succeeds
+    devices = await valid_mock_async_cli.get_devices()
+    assert (type(devices) is DevicesInfo)
+    # Checks that a correct async request to the invalid mock fails due to the
+    # invalid response
+    with pytest.raises(RuntimeError, match="Invalid response format"):
+        devices = await invalid_mock_async_cli.get_devices()
+
+    # Checks that a correct sync request to the valid mock succeeds
+    devices = valid_mock_sync_cli.get_devices()
+    assert (type(devices) is DevicesInfo)
+    # Checks that a correct sync request to the invalid mock fails due to the
+    # invalid response
+    with pytest.raises(RuntimeError, match="Invalid response format"):
+        devices = invalid_mock_sync_cli.get_devices()
 
 
 @pytest.mark.asyncio

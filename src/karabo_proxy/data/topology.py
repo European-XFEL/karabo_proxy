@@ -11,3 +11,9 @@ class TopologyInfo:
     server: Dict[str, Dict[str, Any]]
     client: Dict[str, Dict[str, Any]]
     macro: Dict[str, Dict[str, Any]]
+
+
+@dataclass
+class DevicesInfo:
+    """Devices in the topology."""
+    devices: Dict[str, Dict[str, Any]]
