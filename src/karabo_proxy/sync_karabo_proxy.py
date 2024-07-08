@@ -3,7 +3,7 @@ from typing import Any, Dict
 import requests
 
 from .data.device_config import DeviceConfigInfo, PropertyValue
-from .data.topology import TopologyInfo
+from .data.topology import DevicesInfo, TopologyInfo
 from .data.web_proxy_responses import WriteResponse
 from .message_format import (
     error_401_put, error_403_put, error_422_put, error_on_operation,
@@ -33,6 +33,18 @@ class SyncKaraboProxy:
         try:
             topology_info = TopologyInfo(**data)
             return topology_info
+        except TypeError as te:
+            raise RuntimeError(invalid_response_format(str(te)))
+
+    def get_devices(self) -> DevicesInfo:
+        """Retrieves the devices in the topic containing the connected
+        WebProxy."""
+        resp = requests.get(f"{self.base_url}devices.json",
+                            headers=self._headers)
+        data = self._handle_get_response(resp, "gettting devices")
+        try:
+            devices_info = DevicesInfo(**data)
+            return devices_info
         except TypeError as te:
             raise RuntimeError(invalid_response_format(str(te)))
 
@@ -131,6 +143,8 @@ def main():
     client = SyncKaraboProxy("http://exflqr30450:8282")
     topology = client.get_topology()
     print(f"topology = {topology}")
+    devices = client.get_devices()
+    print(f"devices = {devices}")
     device_config = client.get_device_configuration("Karabo_GuiServer_0")
     print(f"device_config = {device_config}")
     client.set_access_token(

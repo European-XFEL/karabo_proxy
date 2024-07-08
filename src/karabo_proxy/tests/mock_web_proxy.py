@@ -2,6 +2,8 @@ import argparse
 
 from aiohttp import web
 
+# region Mocks Responses
+
 TOPOLOGY_RESPONSE_VALID = (
     '{'
     '  "device": {'
@@ -23,6 +25,20 @@ TOPOLOGY_RESPONSE_INVALID = (
     '  },'
     ' "client": {}'
     '}')  # "devices" and "servers" instead of singular forms; no "macro".
+
+DEVICES_RESPONSE_VALID = (
+    '{'
+    '  "devices": {'
+    '    "A_SIMPLE_DEVICE": {"__deviceId__": "A_SIMPLE_DEVICE"}'
+    '  }'
+    '}')
+
+DEVICES_RESPONSE_INVALID = (
+    '{'
+    '  "device": {'
+    '    "A_SIMPLE_DEVICE": {"__deviceId__": "A_SIMPLE_DEVICE"}'
+    '  }'
+    '}')  # "device" instead of "devices"
 
 DEVICE_GET_CONFIGURATION_VALID = (
     '{'
@@ -67,11 +83,14 @@ DEVICE_EXECUTE_SLOT_INVALID = (
     '  "reason": "none_works has no slot divide"'
     '}')
 
+# endregion
 
 # Port listened by the mock that returns valid responses
 PORT_VALID_MOCK = 8383
 # Port listened by the mock that returns invalid responses
 PORT_INVALID_MOCK = 8484
+
+# region Request Handlers
 
 
 async def _handle_topology(request):
@@ -84,6 +103,18 @@ async def _handle_topology_invalid(request):
     return web.Response(
         content_type="application/json",
         text=TOPOLOGY_RESPONSE_INVALID)
+
+
+async def _handle_devices(request):
+    return web.Response(
+        content_type="application/json",
+        text=DEVICES_RESPONSE_VALID)
+
+
+async def _handle_devices_invalid(request):
+    return web.Response(
+        content_type="application/json",
+        text=DEVICES_RESPONSE_INVALID)
 
 
 async def _handle_get_device_configuration(request):
@@ -123,10 +154,12 @@ async def _handle_execute_slot_invalid(request):
         content_type="application/json",
         text=DEVICE_EXECUTE_SLOT_INVALID)
 
+# endregion
 
 _app_valid = web.Application()
 _app_valid.add_routes([
     web.get("/topology.json", _handle_topology),
+    web.get("/devices.json", _handle_devices),
     web.get("/devices/{device_id}/config.json",
             _handle_get_device_configuration),
     web.put("/devices/{device_id}/config.json",
@@ -137,6 +170,7 @@ _app_valid.add_routes([
 _app_invalid = web.Application()
 _app_invalid.add_routes([
     web.get("/topology.json", _handle_topology_invalid),
+    web.get("/devices.json", _handle_devices_invalid),
     web.get("/devices/{device_id}/config.json",
             _handle_get_device_configuration_invalid),
     web.put("/devices/{device_id}/config.json",
