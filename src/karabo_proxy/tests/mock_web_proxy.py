@@ -55,12 +55,6 @@ DEVICE_GET_CONFIGURATION_INVALID = (
     '  "detail": "Device Karabo_GuiServer_XYZ not online or not alive"'
     '}')
 
-DEVICE_SET_CONFIGURATION_VALID = (
-    '{'
-    '  "success": true, '
-    '  "reason": ""'
-    '}')
-
 DEVICE_SET_CONFIGURATION_INVALID = (
     '{'
     '  "success": false, '
@@ -81,6 +75,37 @@ DEVICE_EXECUTE_SLOT_INVALID = (
     '{'
     '  "success": false, '
     '  "reason": "none_works has no slot divide"'
+    '}')
+
+ADD_INJECTED_PROPERTY_INVALID = (
+    '{'
+    '  "success": false, '
+    '  "reason": "property already existing"'
+    '}')
+
+GET_PROPERTY_VALID = (
+    '{'
+    '  "value": 28, '
+    '  "timestamp": 1720508183, '
+    '  "tid": 0 '
+    '}')
+
+GET_INJECTED_PROPERTY_INVALID = (
+    '{'
+    '  "value": 28, '
+    '  "timestamp": 1720508183 '
+    '}')  # missing tid
+
+INVALID_MODIFY_INJECTED_PROPERTY = (
+    '{'
+    '  "success": false, '
+    '  "reason": "property not among the injected set"'
+    '}')
+
+VALID_MODIFY_RESPONSE = (
+    '{'
+    '  "success": true, '
+    '  "reason": ""'
     '}')
 
 # endregion
@@ -134,10 +159,34 @@ async def _handle_get_device_configuration_invalid(request):
 async def _handle_set_device_configuration(request):
     return web.Response(
         content_type="application/json",
-        text=DEVICE_SET_CONFIGURATION_VALID)
+        text=VALID_MODIFY_RESPONSE)
 
 
 async def _handle_set_device_configuration_invalid(request):
+    return web.Response(
+        content_type="application/json",
+        text=DEVICE_SET_CONFIGURATION_INVALID)
+
+
+async def _handle_get_config_path(request):
+    return web.Response(
+        content_type="application/json",
+        text=GET_PROPERTY_VALID)
+
+
+async def _handle_get_config_path_invalid(request):
+    return web.Response(
+        content_type="application/json",
+        text=DEVICE_GET_CONFIGURATION_INVALID)
+
+
+async def _handle_set_config_path(request):
+    return web.Response(
+        content_type="application/json",
+        text=VALID_MODIFY_RESPONSE)
+
+
+async def _handle_set_config_path_invalid(request):
     return web.Response(
         content_type="application/json",
         text=DEVICE_SET_CONFIGURATION_INVALID)
@@ -154,29 +203,115 @@ async def _handle_execute_slot_invalid(request):
         content_type="application/json",
         text=DEVICE_EXECUTE_SLOT_INVALID)
 
+
+async def _handle_add_injected_property(request):
+    return web.Response(
+        content_type="application/json",
+        text=VALID_MODIFY_RESPONSE)
+
+
+async def _handle_add_injected_property_invalid(request):
+    return web.Response(
+        content_type="application/json",
+        text=ADD_INJECTED_PROPERTY_INVALID)
+
+
+async def _handle_get_injected_property(request):
+    return web.Response(
+        content_type="application/json",
+        text=GET_PROPERTY_VALID)
+
+
+async def _handle_get_injected_property_invalid(request):
+    return web.Response(
+        content_type="application/json",
+        text=GET_INJECTED_PROPERTY_INVALID)
+
+
+async def _handle_set_injected_property(request):
+    return web.Response(
+        content_type="application/json",
+        text=VALID_MODIFY_RESPONSE)
+
+
+async def _handle_set_injected_property_invalid(request):
+    return web.Response(
+        content_type="application/json",
+        text=INVALID_MODIFY_INJECTED_PROPERTY)
+
+
+async def _handle_delete_injected_property(request):
+    return web.Response(
+        content_type="application/json",
+        text=VALID_MODIFY_RESPONSE)
+
+
+async def _handle_delete_injected_property_invalid(request):
+    return web.Response(
+        content_type="application/json",
+        text=INVALID_MODIFY_INJECTED_PROPERTY)
+
+
 # endregion
 
 _app_valid = web.Application()
 _app_valid.add_routes([
     web.get("/topology.json", _handle_topology),
     web.get("/devices.json", _handle_devices),
+    # Note: Due to the way that aiohttp.web.WebApplication matches routes,
+    #       the route for individual property paths must be declared before
+    #       the route for the whole device configuration. If that's not the
+    #       case, the route for the whole device configuration will be matched
+    #       for requests for individual property paths.
+    web.get("/devices/{device_id}.{propertyName}/config.json",
+            _handle_get_config_path),
+    web.put("/devices/{device_id}.{propertyName}/config.json",
+            _handle_set_config_path),
     web.get("/devices/{device_id}/config.json",
             _handle_get_device_configuration),
     web.put("/devices/{device_id}/config.json",
             _handle_set_device_configuration),
     web.put("/devices/{device_id}/slot/{slot_name}.json",
-            _handle_execute_slot)])
+            _handle_execute_slot),
+    web.post("/property/property_test/config.json",
+             _handle_add_injected_property),
+    web.get("/property/property_test/config.json",
+            _handle_get_injected_property),
+    web.put("/property/property_test/config.json",
+            _handle_set_injected_property),
+    web.delete("/property/property_test/config.json",
+               _handle_delete_injected_property),
+])
+
 
 _app_invalid = web.Application()
 _app_invalid.add_routes([
     web.get("/topology.json", _handle_topology_invalid),
     web.get("/devices.json", _handle_devices_invalid),
+    # Note: Due to the way that aiohttp.web.WebApplication matches routes,
+    #       the route for individual property paths must be declared before
+    #       the route for the whole device configuration. If that's not the
+    #       case, the route for the whole device configuration will be matched
+    #       for requests for individual property paths.
+    web.get("/devices/{device_id}.{propertyName}/config.json",
+            _handle_get_config_path_invalid),
+    web.put("/devices/{device_id}.{propertyName}/config.json",
+            _handle_set_config_path_invalid),
     web.get("/devices/{device_id}/config.json",
             _handle_get_device_configuration_invalid),
     web.put("/devices/{device_id}/config.json",
             _handle_set_device_configuration_invalid),
     web.put("/devices/{device_id}/slot/{slot_name}.json",
-            _handle_execute_slot_invalid)])
+            _handle_execute_slot_invalid),
+    web.post("/property/property_test/config.json",
+             _handle_add_injected_property_invalid),
+    web.get("/property/property_test/config.json",
+            _handle_get_injected_property_invalid),
+    web.put("/property/property_test/config.json",
+            _handle_set_injected_property_invalid),
+    web.delete("/property/property_test/config.json",
+               _handle_delete_injected_property_invalid),
+])
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
