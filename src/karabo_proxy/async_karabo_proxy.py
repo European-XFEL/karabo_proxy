@@ -107,6 +107,43 @@ class AsyncKaraboProxy:
                 return await self._handle_write_response(
                     resp, "set property", f"{device_id}.{property_name}")
 
+    async def get_device_schema(
+            self, device_id: str) -> Dict[str, Dict[str, Any]]:
+        """Retrieves the schema of a specified device.
+
+        Parameters:
+        device_id(str):the device whose schema should be retrieved
+
+        Returns:
+        A dictionary whose keys are the properties of the device and the
+        values are dictionaries with the names of the attributes of the
+        property as keys and the values of the attributes as values.
+
+        e.g:
+        {'deviceId': {
+             'displayedName': 'DeviceID',
+             'description': 'The device instance ID',
+             'assignment': 'OPTIONAL',
+             ...
+            },
+         'heartbeatInterval': {
+            'displayedName': 'Heartbeat interval',
+            ...
+            }
+         ...
+        }
+        """
+        async with ClientSession(headers=self._headers) as session:
+            async with session.get(
+                    f"{self.base_url}devices/{device_id}/schema.json") as resp:
+                data = await self._handle_get_response(
+                    resp, "getting device schema")
+                try:
+                    schema = dict(**data)
+                    return schema
+                except TypeError as te:
+                    raise RuntimeError(invalid_response_format(str(te)))
+
     async def execute_slot(
             self, device_id: str, slot_name: str,
             slot_params: Dict[str, PropertyValue]) -> WriteResponse:
@@ -295,6 +332,11 @@ async def main():
     print(f"topology = {topology}")
     devices = await client.get_devices()
     print(f"devices = {devices}")
+    print()
+    print("--- Get device schema ---")
+    print()
+    schema = await client.get_device_schema("Karabo_GuiServer_0")
+    print(f"schema = {schema}")
     print()
     print("--- Get device configuration ---")
     print()

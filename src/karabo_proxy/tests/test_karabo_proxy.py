@@ -115,8 +115,7 @@ async def test_get_device_configuration(web_proxy_mocks,
     assert type(config) is dict
     assert "_deviceId_" in config
     assert config["_deviceId_"]["value"] in DEVICE_GET_CONFIGURATION_VALID
-    # Checks that a correct async request to the invalid mock fails with an
-    # error that the queried device is not available
+    # Checks that a correct async request to the invalid mock fails
     with pytest.raises(RuntimeError,
                        match="Error getting device configuration"):
         config = await invalid_mock_async_cli.get_device_configuration(
@@ -144,8 +143,7 @@ async def test_get_config_path(web_proxy_mocks,
     prop = await valid_mock_async_cli.get_device_config_path("any_works",
                                                              "prop")
     assert type(prop) is PropertyInfo
-    # Checks that a correct async request to the invalid mock fails with an
-    # error that the queried device is not available
+    # Checks that a correct async request to the invalid mock fails
     with pytest.raises(RuntimeError,
                        match="Invalid response format"):
         await invalid_mock_async_cli.get_device_config_path("none_works",
@@ -154,8 +152,7 @@ async def test_get_config_path(web_proxy_mocks,
     # Checks that a correct sync request to the valid mock succeeds
     prop = valid_mock_sync_cli.get_device_config_path("any_works", "prop")
     assert type(prop) is PropertyInfo
-    # Checks that a correct async request to the invalid mock fails with an
-    # error that the queried device is not available
+    # Checks that a correct async request to the invalid mock fails
     with pytest.raises(RuntimeError,
                        match="Invalid response format"):
         invalid_mock_sync_cli.get_device_config_path("none_works", "prop")
@@ -172,8 +169,7 @@ async def test_set_device_configuration(web_proxy_mocks,
         "any_works", {"a_property": 120, "another_property": "abc"})
     assert result.success
     assert result.reason == ""
-    # Checks that a correct async request to the invalid mock fails with an
-    # error that the queried device is not available
+    # Checks that a correct async request to the invalid mock fails
     result = await invalid_mock_async_cli.set_device_configuration(
         "none_works", {"a_property": 120})
     assert not result.success
@@ -184,8 +180,7 @@ async def test_set_device_configuration(web_proxy_mocks,
         "any_works", {"a_property": 120, "another_property": "abc"})
     assert result.success
     assert result.reason == ""
-    # Checks that a correct sync request to the invalid mock fails with an
-    # error that the queried device is not available
+    # Checks that a correct sync request to the invalid mock fails
     result = invalid_mock_sync_cli.set_device_configuration(
         "none_works", {"a_property": 120})
     assert not result.success
@@ -203,8 +198,7 @@ async def test_set_config_path(web_proxy_mocks,
                                                                "prop", 78)
     assert result.success
     assert result.reason == ""
-    # Checks that a correct async request to the invalid mock fails with an
-    # error that the queried device is not available
+    # Checks that a correct async request to the invalid mock fails
     result = await invalid_mock_async_cli.set_device_config_path("none_works",
                                                                  "prop", 78)
     assert not result.success
@@ -215,12 +209,34 @@ async def test_set_config_path(web_proxy_mocks,
                                                         "prop", 78)
     assert result.success
     assert result.reason == ""
-    # Checks that a correct sync request to the invalid mock fails with an
-    # error that the queried device is not available
+    # Checks that a correct sync request to the invalid mock fails
     result = invalid_mock_sync_cli.set_device_config_path("none_works",
                                                           "prop", 78)
     assert not result.success
     assert result.reason.startswith("Lacking valid access_token")
+
+
+@pytest.mark.asyncio
+async def test_get_device_schema(web_proxy_mocks,
+                                 valid_mock_async_cli,
+                                 valid_mock_sync_cli,
+                                 invalid_mock_async_cli,
+                                 invalid_mock_sync_cli):
+    # Checks that a correct async request to the valid mock succeeds
+    schema = await valid_mock_async_cli.get_device_schema("any_works")
+    assert type(schema) is dict
+    # Checks that a correct async request to the invalid mock fails
+    with pytest.raises(RuntimeError,
+                       match="Device not online"):
+        await invalid_mock_async_cli.get_device_schema("none_works")
+
+    # Checks that a correct sync request to the valid mock succeeds
+    schema = valid_mock_sync_cli.get_device_schema("any_works")
+    assert type(schema) is dict
+    # Checks that a correct async request to the invalid mock fails
+    with pytest.raises(RuntimeError,
+                       match="Device not online"):
+        invalid_mock_sync_cli.get_device_schema("none_works")
 
 
 @pytest.mark.asyncio

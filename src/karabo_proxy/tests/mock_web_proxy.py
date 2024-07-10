@@ -61,6 +61,25 @@ DEVICE_SET_CONFIGURATION_INVALID = (
     '  "reason": "Lacking valid access_token with permissions ..."'
     '}')
 
+DEVICE_GET_SCHEMA_VALID = (
+    '{'
+    '  "_deviceId_": { '
+    '     "displayedName": "_DeviceID_", '
+    '     "description": "Do not set this property.", '
+    '     "requiredAccessLevel": "ADMIN" '
+    '  }, '
+    '  "heartbeatInterval" :{ '
+    '     "displayedName": "Heartbeat interval", '
+    '     "description": "Interval in seconds between device heartbeats", '
+    '     "requiredAccessLevel": "ADMIN" '
+    '  } '
+    '}')
+
+DEVICE_GET_SCHEMA_INVALID = (
+    '{'
+    '  "detail": "Device not online or not alive"'
+    '}')
+
 DEVICE_EXECUTE_SLOT_VALID = (
     '{'
     '  "success": true, '
@@ -204,6 +223,19 @@ async def _handle_execute_slot_invalid(request):
         text=DEVICE_EXECUTE_SLOT_INVALID)
 
 
+async def _handle_get_device_schema(request):
+    return web.Response(
+        content_type="application/json",
+        text=DEVICE_GET_SCHEMA_VALID)
+
+
+async def _handle_get_device_schema_invalid(request):
+    return web.Response(
+        content_type="application/json",
+        text=DEVICE_GET_SCHEMA_INVALID,
+        status=500)
+
+
 async def _handle_add_injected_property(request):
     return web.Response(
         content_type="application/json",
@@ -271,6 +303,8 @@ _app_valid.add_routes([
             _handle_get_device_configuration),
     web.put("/devices/{device_id}/config.json",
             _handle_set_device_configuration),
+    web.get("/devices/{device_id}/schema.json",
+            _handle_get_device_schema),
     web.put("/devices/{device_id}/slot/{slot_name}.json",
             _handle_execute_slot),
     web.post("/property/property_test/config.json",
@@ -301,6 +335,8 @@ _app_invalid.add_routes([
             _handle_get_device_configuration_invalid),
     web.put("/devices/{device_id}/config.json",
             _handle_set_device_configuration_invalid),
+    web.get("/devices/{device_id}/schema.json",
+            _handle_get_device_schema_invalid),
     web.put("/devices/{device_id}/slot/{slot_name}.json",
             _handle_execute_slot_invalid),
     web.post("/property/property_test/config.json",
