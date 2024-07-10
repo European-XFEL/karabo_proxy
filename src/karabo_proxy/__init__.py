@@ -6,5 +6,5 @@
 # Karabo itself is licensed under the terms of the MPL 2.0 license.
 # flake8: noqa
 
-# TODO uncomment the line below once dependency on karabo.native is sorted out.
-# from .async_channel import AsyncChannelClient
+from .async_karabo_proxy import AsyncKaraboProxy
+from .sync_karabo_proxy import SyncKaraboProxy
