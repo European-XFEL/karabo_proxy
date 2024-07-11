@@ -3,7 +3,7 @@
 ## Overview
 
 The Karabo WebProxy device exposes a web API that allows any HTTP client to
-interact with devices in its [Karabo](https://karabo.eu) topic.
+interact with devices in its [Karabo](http://karabo.eu) topic.
 
 This project, **Karabo-Proxy**, provides a convenience Python 3 client library for
 interacting with an instance of the Karabo WebProxy device in a (mostly)
