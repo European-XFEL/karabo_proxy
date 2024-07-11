@@ -8,8 +8,12 @@
 variables:
   USE_ISORT: "true"
   USE_FLAKE: "true"
+  BRANCH_NAME: "main"
 
 include:
   - project: karabo/gitlabci
     file: .python-ci.yml
+    ref: main
+  - project: karabo/gitlabci
+    file: .mirror-device.yml
     ref: main
