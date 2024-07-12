@@ -1,6 +1,6 @@
 import json
 from dataclasses import asdict
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from aiohttp import ClientResponse, ClientSession
 
@@ -146,7 +146,8 @@ class AsyncKaraboProxy:
 
     async def execute_slot(
             self, device_id: str, slot_name: str,
-            slot_params: Dict[str, PropertyValue]) -> WriteResponse:
+            slot_params: Optional[
+                Dict[str, PropertyValue]] = None) -> WriteResponse:
         """Executes a device slot. Supports both parameterless slots (commands)
         and slots with parameters. The results of the slot execution (if any)
         will be available as a dictionay in the field 'reply' of the response
@@ -376,7 +377,7 @@ async def main():
     print("--- Slot Execution: topologyCheck.slotForceCheck ---")
     print()
     result = await client.execute_slot(
-        "KARABO_DATALOGGERMANAGER_0", "topologyCheck.slotForceCheck", {})
+        "KARABO_DATALOGGERMANAGER_0", "topologyCheck.slotForceCheck")
     print(result)
     print()
     print("--- Full property injection cycle: flushInterval ---")

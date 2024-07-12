@@ -15,6 +15,7 @@ Karabo_proxy = ["data/*.*"]
 [project]
 dynamic = ["version"]
 name = "Karabo-proxy"
+license = {file = "LICENSE"}
 authors = [
     {name = "costar & degon"},
 ]
