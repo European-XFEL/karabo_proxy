@@ -12,9 +12,6 @@ where = ["src"]
 [tool.setuptools.package-data]
 Karabo_proxy = ["data/*.*"]
 
-[project.scripts]
-karabo-channel = "karabo_proxy.async_channel:main"
-
 [project]
 dynamic = ["version"]
 name = "Karabo-proxy"
@@ -29,6 +26,10 @@ dependencies = [
     "aiohttp >= 3.9.0",
     "requests >= 2.28.0",
 ]
+
+[project.urls]
+Homepage="https://github.com/European-XFEL/karabo_proxy"
+
 [project.optional-dependencies]
 test = [
     "flake8",
