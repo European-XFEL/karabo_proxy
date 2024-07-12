@@ -1,6 +1,6 @@
 dist/
 build/
-src/karabo-proxy/_version.py
+src/karabo_proxy/_version.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

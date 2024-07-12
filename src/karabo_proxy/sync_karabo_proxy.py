@@ -138,7 +138,7 @@ class SyncKaraboProxy:
             slot_params: Dict[str, PropertyValue]) -> WriteResponse:
         """Executes a device slot. Supports both parameterless slots (commands)
         and slots with parameters. The results of the slot execution (if any)
-        will be available as a dictionay in the field 'reply' of the response
+        will be available as a dictionary in the field 'reply' of the response
         """
         resp = requests.put(
             f"{self.base_url}devices/{device_id}/slot/{slot_name}.json",
